@@ -1,0 +1,472 @@
+                                           Sample job using mathematical functions
+
+@Library('mylibrary')_
+pipeline
+{
+    agent any 
+    stages
+    {
+        stage('Run shared lib code')
+        {
+            steps
+            {
+                script
+                {
+                    math.sum(10,20)
+                    math.mul(5,3)
+                    math.div(20,2)
+                }
+            }
+        }
+    }
+}
+
+
+
+
+                                                Scripted pipeline
+
+
+
+node('built-in')
+{
+    stage('continuous download') 
+    {
+   git 'https://github.com/intelliqittrainings/maven.git'
+    }
+  stage('continuous build') 
+    {
+        sh 'mvn package'
+}
+   stage('continuousDeployment') 
+    {
+    deploy adapters: [tomcat9(credentialsId: '0e9bf210-6f3c-4b27-9fc0-c539e8cbc7a3', path: '', url: 'http://172.31.17.128:8080')], contextPath: 'mytestapp', war: '**/*.war'
+}
+ stage('continuous testing') 
+    {
+         git 'https://github.com/intelliqittrainings/FunctionalTesting.git'
+    
+        }
+         stage('continuous delivery') 
+    {
+        deploy adapters: [tomcat9(credentialsId: '512976cb-e580-4b9a-a8eb-c97961b4f35a', path: '', url: 'http://172.31.30.105:8080')], contextPath: 'myprodapp', war: '**/*.war'
+    
+        }
+        
+}
+
+
+                                               Scripted pipeline
+
+
+node('built-in')
+{
+   stage('continuousdownload')
+   {
+      git 'https://github.com/intelliqittrainings/maven.git'
+    }
+    stage('continuousbuild')
+   {
+     sh 'mvn package'
+    }
+    stage('continuousdeployment')
+   {
+    deploy adapters: [tomcat9(credentialsId: '512976cb-e580-4b9a-a8eb-c97961b4f35a', path: '', url: 'http://172.31.17.128:8080')], contextPath: 'testapp', war: '**/*.war'
+    }
+    stage('continuoustesting')
+   {
+       git 'https://github.com/intelliqittrainings/FunctionalTesting.git'
+       sh 'java -jar /var/lib/jenkins/workspace/scriptedpipeline1/testing.jar'
+    
+    }
+    stage('continuousdelivery')
+   {
+    deploy adapters: [tomcat9(credentialsId: '512976cb-e580-4b9a-a8eb-c97961b4f35a', path: '', url: 'http://172.31.22.117:8080')], contextPath: 'prodapp', war: '**/*.war'
+    }
+    
+    
+}
+
+
+
+
+                                          
+
+                                       scripted pipeline using try catch
+
+
+
+node('built-in')
+{
+  stage('contdownload')
+    {
+      try
+        {
+           git 'https://github.com/saiteja6301/maven.git'
+         }
+         catch(Exception e1)
+        {
+            mail bcc: '', body: 'jenkins is unable to download the maven', cc: '', from: '', replyTo: '', subject: 'download failed', to: 'git.admin@gmail.com'
+             
+        }
+    
+    }
+    stage('contbuild')
+     {
+       try
+       {
+           sh 'mvn package'
+       }
+       catch(Exception e2)
+       {
+           mail bcc: '', body: 'jenkins is unable to build artifact', cc: '', from: '', replyTo: '', subject: 'build failed', to: 'qa.team@gmail.com'
+       }
+    }
+    stage('contdeployment')
+      {
+        try
+        {
+            deploy adapters: [tomcat9(credentialsId: '512976cb-e580-4b9a-a8eb-c97961b4f35a', path: '', url: 'http://172.31.17.128:8080')], contextPath: 'testapp', war: '**/*.war'
+        }
+        catch(Exception e3)
+        {
+            mail bcc: '', body: 'jenkins is unable to deploy the maven code', cc: '', from: '', replyTo: '', subject: 'Deployment failed', to: 'middleware.team@gmail.com'
+        }
+        
+      }
+      stage('conttesting')
+      {
+           try
+           {
+                git 'https://github.com/intelliqittrainings/FunctionalTesting.git'
+                sh 'java -jar /var/lib/jenkins/workspace/scriptedpipeline2/testing.jar'
+    
+           }
+           catch(Exception e4)
+           {
+               mail bcc: '', body: 'jenkins is unable to run the selenium code ', cc: '', from: '', replyTo: '', subject: 'testing failed', to: 'testing.team@gmail.com'
+           }
+      }
+      stage('contdelivery')
+      {
+          try
+          {
+              deploy adapters: [tomcat9(credentialsId: '512976cb-e580-4b9a-a8eb-c97961b4f35a', path: '', url: 'http://172.31.22.117:8080')], contextPath: 'prodapp', war: '**/*.war'
+          }
+          catch(Exception e5)
+          {
+              mail bcc: '', body: 'jenkins is unable to deploy the code in prod server', cc: '', from: '', replyTo: '', subject: 'deployment failed', to: 'delivery.team@gmail.com'
+          }
+      }
+      
+}
+
+
+
+
+
+    
+                                         Scripted pipeline with shared libraries
+
+
+
+
+
+@Library('mylibrary')_
+node('built-in')
+{
+    stage('ContDownload')
+    {
+        cicd.gitDownload("maven")
+    }
+    stage('ContBuild')
+    {
+        cicd.mavenBuild()
+
+    }
+    stage('ContDeployment')
+    {
+         cicd.tomcatDeploy("ScriptedPipelinewithSharedLibraries","172.31.17.128","testapp")
+
+    }
+    stage('ContTesting')
+    {
+        cicd.gitDownload("functionaltesting")
+        
+    }
+    stage('testcases')
+    {
+        cicd.runSelenium("ScriptedPipelinewithSharedLibraries")
+
+    }
+    stage('ContDelivery')
+    {
+         cicd.tomcatDeploy("ScriptedPipelinewithSharedLibraries","172.31.22.117","prodapp")
+    }
+}
+
+
+
+                                                 Declarative pipeline
+
+
+
+
+
+pipeline
+{
+    agent any 
+    stages
+    {
+        stage('contdownload')
+        {
+            steps
+            {
+                git 'https://github.com/saiteja6301/maven.git'
+            }
+        }
+         stage('contbuild')
+        {
+            steps
+            {
+                sh 'mvn package'
+            }
+        }
+         stage('contdeployment')
+        {
+            steps
+            {
+               deploy adapters: [tomcat9(credentialsId: '512976cb-e580-4b9a-a8eb-c97961b4f35a', path: '', url: 'http://172.31.17.128:8080')], contextPath: 'testapp1', war: '**/*.war'
+            }
+        }
+        stage('conttesting')
+        {
+            steps
+            {
+                git 'https://github.com/intelliqittrainings/FunctionalTesting.git'
+                
+                sh 'java -jar /var/lib/jenkins/workspace/Declarativepipeline/testing.jar'
+            }
+        }
+        stage('contdelivery')
+        {
+            steps
+            {
+               deploy adapters: [tomcat9(credentialsId: '512976cb-e580-4b9a-a8eb-c97961b4f35a', path: '', url: 'http://172.31.22.117:8080')], contextPath: 'prodapp', war: '**/*.war'
+            }
+        }
+        
+        
+        
+    }
+}
+
+
+
+
+
+                                        Declarative pipeline using try catch
+
+
+
+
+pipeline
+{
+    agent any 
+    stages
+    {
+        stage('contdownload')
+        {
+            steps
+            {
+                script
+                {
+                    try
+                    {
+                       git 'https://github.com/saiteja6301/maven.git'   
+                    }
+                    catch(Exception e1)
+                    {
+                        mail bcc: '', body: 'Jenkins is unable to download from github', cc: '', from: '', replyTo: '', subject: 'download failed', to: 'git.admin@gmail.com'
+                        
+                        exit(1)
+                     }
+                }
+            
+            }
+        }
+         stage('contbuild')
+        {
+            steps
+            {
+                script
+                {
+                    try
+                    {
+                         sh 'mvn package'
+                    }
+                    catch(Exception e2)
+                    {
+                        mail bcc: '', body: 'Jenkins is unable to create the artifact', cc: '', from: '', replyTo: '', subject: 'build failed', to: 'dev.team@gmail.com'
+                        
+                        exit(1)
+                    }
+                }
+                
+            }
+        }
+         stage('contdeployment')
+        {
+            steps
+            {
+               script
+                {
+                     try
+                     
+                      {
+                        deploy adapters: [tomcat9(credentialsId: '512976cb-e580-4b9a-a8eb-c97961b4f35a', path: '', url: 'http://172.31.17.128:8080')], contextPath: 'testapp1', war: '**/*.war' 
+                      }
+                      catch(Exception e3)
+                      {
+                        mail bcc: '', body: 'Jenkins is unable to deploy into tomcat on qaservers', cc: '', from: '', replyTo: '', subject: 'Deployment failed', to: 'middleware.team@gmail.com'
+                         exit(1)
+                       }
+                }
+                
+               
+            }
+        }
+        stage('conttesting')
+        {
+            steps
+            {
+                script
+                {
+                    try
+                    {
+                         git 'https://github.com/intelliqittrainings/FunctionalTesting.git'
+                
+                         sh 'java -jar /var/lib/jenkins/workspace/Declarativepipeline/testing.jar'
+                    }
+                     catch(Exception e4)
+                     
+                    {
+                        mail bcc: '', body: 'selinium testing failed', cc: '', from: '', replyTo: '', subject: 'testing failed', to: 'qa.team@gmail.com'
+                        exit(1)
+                    }
+                }
+               
+            }
+        }
+        stage('contdelivery')
+        {
+            steps
+            {
+                script
+                {
+                    
+                
+                    try
+                       {
+                         deploy adapters: [tomcat9(credentialsId: '512976cb-e580-4b9a-a8eb-c97961b4f35a', path: '', url: 'http://172.31.22.117:8080')], contextPath: 'prodapp', war: '**/*.war' 
+                        }
+                         catch(Exception e5)
+                        {
+                            mail bcc: '', body: 'Jenkins is unable to deploy into tomcat on prodservers', cc: '', from: '', replyTo: '', subject: 'deployment failed', to: 'delivery.team@gmail.com'
+                            
+                        }
+                    
+                }
+               
+            }
+        }
+        
+        
+        
+    }
+}  
+
+
+
+
+
+                               Declarative pipeline with shared libraries
+
+
+
+@Library('mylibrary')_
+
+pipeline
+{
+    agent any
+    stages
+    {
+        stage('ContDownload')
+        {
+            steps
+            {
+                script
+                {
+                    cicd.gitDownload("maven")
+                    
+                }
+            }
+        }
+        stage('contBuild')
+        {
+            steps
+            {
+                script
+                {
+                    cicd.mavenBuild()
+                }
+            }
+        }
+        stage('contDeployment')
+        {
+            steps
+            {
+                script
+                {
+                    cicd.tomcatDeploy("DeclarativePipelinewithSharedLibraries","172.31.17.128","testapp")
+                }
+            }
+        }
+        stage('contTesting')
+        {
+            steps
+            {
+                script
+                {
+                    cicd.gitDownload("functionaltesting")
+                }
+            }
+        }
+         stage('testcases')
+        {
+            steps
+            {
+                script
+                {
+                    cicd.runSelenium("DeclarativePipelinewithSharedLibraries") 
+                }
+            }
+        }
+        
+        stage('contDelivery')
+        {
+            steps
+            {
+                script
+                {
+                    cicd.tomcatDeploy("DeclarativePipelinewithSharedLibraries","172.31.22.117","prodapp")
+                }
+            }
+        }
+    }
+}
+
+
+
+
+                                      
